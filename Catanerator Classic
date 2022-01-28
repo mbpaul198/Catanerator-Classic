@@ -1,0 +1,292 @@
+#####################
+## Set house rules ##
+#####################
+
+# Do you want non-adjacent reds ("True" or "False")?
+nonAdjReds = True
+
+
+# Set the maximum probability per vertex
+maxDots = 12
+
+
+#########################################
+## Prepare all of the hexes and values ##
+#########################################
+
+
+# Create a list of names for each spot on the board. 
+#The name of the spot is a cumulation of each lettered vertex that it touches
+
+hexSpotNames = ["AB","BCD","DE","EFG","GH","HIJ","JK","KLM","MN","NOP","PQ","QRA",
+                "ABCTSR","CDEFUT","UFGHIV","WVIJKL","LMNOXW","OPQRSX",
+                "STUVWX"]
+
+# Create a list of resources
+listOfResources = ["Desert", "Fields","Fields","Fields","Fields", 
+                   "Hills","Hills","Hills",
+                   "Mountains","Mountains","Mountains",
+                   "Pasture","Pasture","Pasture","Pasture",
+                   "Forest","Forest","Forest","Forest"]
+
+# Create a list of number tokens (0 is the desert)
+listOfNumbers = [0,2,3,3,4,4,5,5,6,6,8,8,9,9,10,10,11,11,12]
+
+# Place Desert
+
+# Import random
+import random
+
+# Create a function that adds appends probability for each spot after the spot number
+def spotProbFunc (spotNumber):
+    if spotNumber == 0:
+        spotProb = 0
+    if spotNumber == 2 or spotNumber == 12:
+        spotProb = 1
+    if spotNumber == 3 or spotNumber == 11:
+        spotProb = 2
+    if spotNumber == 4 or spotNumber == 10:
+        spotProb = 3
+    if spotNumber == 5 or spotNumber == 9:
+        spotProb = 4
+    if spotNumber == 6 or spotNumber == 8:
+        spotProb = 5
+
+    return spotProb
+    
+
+# Create an empty list for hex spots, resources, numbers, and probability
+listOfSpots = []
+
+###################################
+## Set the desert spot and value ##
+###################################
+
+desertCounter = 0
+
+if desertCounter == 0:
+    randomHex = random.choice(hexSpotNames) # Pick random hex and assign to a variable
+    hexSpotNames.remove(randomHex) # Remove hex from list
+    
+    desertResourceIndex = listOfResources.index("Desert") # Identify the index of the desert 
+    desertResource = listOfResources[desertResourceIndex] # Assign the desert a variable
+    listOfResources.remove(desertResource) # Remove desert resource from list of resources
+   
+    desertNumberIndex = listOfNumbers.index(0) # Identify the index of desert number (0)
+    desertNumber = listOfNumbers[desertNumberIndex] # Assign the desert number a variable
+    listOfNumbers.remove(desertNumber) # Remove the number from list of numbers
+    
+    probability = spotProbFunc(desertNumber)
+    
+    desertSpotList = [randomHex, desertResource, desertNumber, probability] # Create spot for the desert
+    
+    listOfSpots.append(desertSpotList) # Append the desert spot to the list of spots
+    
+    desertCounter = desertCounter + 1 # Add 1 to the desert counter 
+
+    
+###########################################
+## Set sixes and eights spots and values ##
+###########################################
+
+# Create a list for sixes and eights only
+sixAndEightList = []
+
+# Count the number of 6s and 8s in the list of numbers
+sixCount = listOfNumbers.count(6)
+eightCount = listOfNumbers.count(8)
+sixAndEightCount = sixCount + eightCount
+
+# Add sixes to a six and eight only list
+for theCount in range(sixCount):
+    sixIndex = listOfNumbers.index(6) # Identify index of first six in list
+    sixNumber = listOfNumbers[sixIndex] # Assign the number six a variable
+    sixAndEightList.append(sixNumber) # Append the six to the six and eight only list
+    listOfNumbers.remove(sixNumber) # Remove the number from list of numbers
+
+
+# Add eights to a six and eight only list
+for theCount in range(eightCount):
+    eightIndex = listOfNumbers.index(8) # Identify index of first eight in list
+    eightNumber = listOfNumbers[eightIndex] # Assign the number eight a variable
+    sixAndEightList.append(eightNumber) # Append the eight to the six and eight only list
+    listOfNumbers.remove(eightNumber) # Remove the number from list of numbers
+    
+# Make a list off all the spots the are not available for sixes and eights
+adjacentRedsList = []
+
+adjacentRed = 1
+
+# Create a function that randomly assigns 6s and 8s spots and relays if there are any adjacent 6s or 8s
+def nonAdjacentRedFunc():
+    
+    adjacentRed = 0
+    
+    randomHex = random.choice(hexSpotNames) # Pick random hex and assign to a variable
+    
+    for hexLetter in randomHex:
+        for theRedSpot in adjacentRedsList:
+            for theLetter in theRedSpot:
+                if theLetter == hexLetter:
+                    adjacentRed = adjacentRed + 1
+                    
+    return [randomHex, adjacentRed]
+
+for theNumber in range(sixAndEightCount):
+    
+    hexAndAdjReds = nonAdjacentRedFunc()
+    
+
+    # Only run if user decides to set non adjacent reds
+    # Run the nonAdjacentRedFunc until there are no 6s or 8s that are adjacent
+
+    while nonAdjReds == True:
+        while hexAndAdjReds[1] > 0:
+            hexAndAdjReds = nonAdjacentRedFunc()
+        break
+
+
+    randomHex = hexAndAdjReds[0]
+              
+    hexSpotNames.remove(randomHex) # Remove hex from list
+    adjacentRedsList.append(randomHex) # Add hex to list of hexes with 6s or 8s
+
+    randomResource = random.choice(listOfResources) # Pick a random value from the list of terrains
+    listOfResources.remove(randomResource) # Remove terrain from list
+    
+    randomSixOrEight = random.choice(sixAndEightList) # Pick a random six or eight from the six and eight only list
+    sixAndEightList.remove(randomSixOrEight) # Remove number from list
+    
+    probability = spotProbFunc(randomSixOrEight)
+                                    
+    spotList = [randomHex, randomResource, randomSixOrEight, probability]
+                                         
+    listOfSpots.append(spotList)
+
+                                     
+#########################
+## Set all other spots ##
+#########################
+
+loopiterations = 0
+
+for spotNum in range(len(hexSpotNames)):
+    
+    randomHex = random.choice(hexSpotNames) # Pick random hex and assign to a variable
+    hexSpotNames.remove(randomHex) # Remove hex from list
+
+    randomResource = random.choice(listOfResources) # Assign a random resource a variable
+    listOfResources.remove(randomResource) # Remove resource from list of resources
+
+
+    # Iterate through the existing spots and see add probability
+
+    # Create a list of probabilities for each vertex (letter) that boarders the random hex
+    probSumList = []
+
+    probSum = 0
+
+    for hexLetter in randomHex: 
+        for theSpot in listOfSpots:
+            for theLetter in theSpot[0]:
+                if theLetter == hexLetter:
+                    probSum = probSum + spotProbFunc(theSpot[2])
+
+        probSumList.append(probSum)
+
+        probSum = 0
+
+    # Find the max of the value in the prabability list
+    vertexProb = max(probSumList)
+
+    maxProbRemain = maxDots - vertexProb
+
+
+    # Randomly choose a number. If the probability of that number is greater than the maxProbLeft, choose another
+
+    randomNumber = random.choice(listOfNumbers) # Pick a random number from the list number tokens
+    probability = spotProbFunc(randomNumber)
+    
+    loopIterations = 0  # Create a counter to ensure that the program does not run inefinately if the 
+                        # criteria is not met
+
+    while probability > maxProbRemain and loopIterations < 20 :
+        randomNumber = random.choice(listOfNumbers) # Pick a random number from the list number tokens
+        probability = spotProbFunc(randomNumber)
+        
+        loopIterations = loopIterations + 1
+
+
+    listOfNumbers.remove(randomNumber) # Remove the number from list of numbers
+
+    spotList = [randomHex, randomResource, randomNumber, probability]
+
+    listOfSpots.append(spotList)
+    
+    
+#################################################
+## Order spots and prepare to format the board ##
+#################################################
+
+# Order listOfSpots to match the board layout
+
+orderedListOfSpots = []
+
+orderedHexSpotNames = ["AB","BCD","DE",
+ "QRA","ABCTSR","CDEFUT","EFG",
+ "PQ", "OPQRSX", "STUVWX", "UFGHIV", "GH",
+ "NOP","LMNOXW","WVIJKL","HIJ",
+ "MN","KLM","JK"]
+
+for theHex in orderedHexSpotNames:
+    for theSpot in listOfSpots:
+        if theSpot[0] == theHex:
+            orderedListOfSpots.append([theSpot[1],theSpot[2]])
+                                       
+
+
+
+boardList = [["|   |","|   |","|   |"],
+             ["|   |","|   |","|   |","|   |"],
+             ["|   |","|   |","|   |","|   |","|   |"],
+             ["|   |","|   |","|   |","|   |"],
+             ["|   |","|   |","|   |"]]
+
+# Add the hex type and value to the boardList in each spot
+
+iterNum = 0
+for rowCount,theRow in enumerate(boardList):
+    
+    for hexCount,theHex in enumerate(theRow):
+        
+        boardList[rowCount][hexCount] = orderedListOfSpots[iterNum]
+        iterNum = iterNum + 1
+
+
+################################
+## Format and print the board ##
+################################
+
+for theRow in boardList:
+    rowLen = len(theRow)
+    line = "-------------   "
+        
+    if rowLen == 3:
+        
+        print ("              " + line * rowLen)
+        print ("              " + str(theRow))
+        print ("              " + line * rowLen)
+         
+        
+    if rowLen == 4:
+        
+        print ("        " + line * rowLen)
+        print ("        " + str(theRow))
+        print ("        " + line * rowLen)
+            
+        
+    if rowLen == 5:
+        
+        print (line * rowLen)
+        print (theRow)
+        print (line * rowLen)
